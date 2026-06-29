@@ -1,0 +1,10 @@
+{
+  "name": "Civic Voice",
+  "description": "A hyperlocal community problem solver that allows citizens to report, validate, track, and resolve local issues dynamically.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
