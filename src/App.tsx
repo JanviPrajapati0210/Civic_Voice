@@ -37,6 +37,34 @@ import { motion, AnimatePresence } from "motion/react";
 export default function App() {
   // Load local persistent states
   const [data, setData] = useState(() => getStoredData());
+  const [issuesLoaded, setIssuesLoaded] = useState(false);
+
+  // Fetch shared issues from server on mount — replaces localStorage issues with server-side shared ones
+  useEffect(() => {
+    fetch("/api/issues")
+      .then((r) => r.json())
+      .then((result) => {
+        if (!result.seeded && Array.isArray(result.issues) && result.issues.length > 0) {
+          setData((prev) => ({ ...prev, issues: result.issues }));
+        }
+        setIssuesLoaded(true);
+      })
+      .catch(() => {
+        // Server unavailable — fall back to localStorage issues silently
+        setIssuesLoaded(true);
+      });
+  }, []);
+
+  // Sync issues to server whenever they change (after initial load)
+  const syncIssuesToServer = (issues: any[]) => {
+    fetch("/api/issues", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ issues }),
+    }).catch(() => {
+      // Fail silently — localStorage still has the data as backup
+    });
+  };
   const [theme, setTheme] = useState<"light" | "dark">(() => {
     if (typeof window !== "undefined") {
       const savedTheme = localStorage.getItem("community_hero_theme");
@@ -221,13 +249,31 @@ export default function App() {
   };
 
 
-  // Gamification floating overlays
+  // Poll server every 30 seconds to pick up issues reported by other users
+  useEffect(() => {
+    if (!issuesLoaded) return;
+    const interval = setInterval(() => {
+      fetch("/api/issues")
+        .then((r) => r.json())
+        .then((result) => {
+          if (!result.seeded && Array.isArray(result.issues) && result.issues.length > 0) {
+            setData((prev) => ({ ...prev, issues: result.issues }));
+          }
+        })
+        .catch(() => {});
+    }, 30000); // every 30 seconds
+    return () => clearInterval(interval);
+  }, [issuesLoaded]);
   const [floatingXps, setFloatingXps] = useState<Array<{ id: number; text: string; x: number; y: number }>>([]);
   const [recentBadgeUnlocked, setRecentBadgeUnlocked] = useState<Badge | null>(null);
 
-  // Sync to local storage when state changes
+  // Sync to localStorage when state changes
   useEffect(() => {
     saveStoredData(data);
+    // Also sync issues to server so all users see them (only after initial load)
+    if (issuesLoaded) {
+      syncIssuesToServer(data.issues);
+    }
   }, [data]);
 
   // Floating XP trigger

@@ -515,6 +515,54 @@ ${JSON.stringify(existingSummary, null, 2)}
   }
 });
 
+// 5. Shared Issues Store — all users read/write the same issues list
+// Issues are stored in a JSON file on the server so they persist across all browsers/users
+import fs from "fs";
+
+const ISSUES_FILE = path.join(process.cwd(), "shared_issues.json");
+
+// Load issues from file, fall back to empty array if file doesn't exist
+function loadSharedIssues() {
+  try {
+    if (fs.existsSync(ISSUES_FILE)) {
+      const raw = fs.readFileSync(ISSUES_FILE, "utf-8");
+      return JSON.parse(raw);
+    }
+  } catch (e) {
+    console.warn("[SharedIssues] Failed to load issues file, starting fresh.");
+  }
+  return null; // null means "use client seed data"
+}
+
+// Save issues to file
+function saveSharedIssues(issues: any[]) {
+  try {
+    fs.writeFileSync(ISSUES_FILE, JSON.stringify(issues), "utf-8");
+  } catch (e) {
+    console.error("[SharedIssues] Failed to save issues file:", e);
+  }
+}
+
+// GET /api/issues — fetch all shared issues
+app.get("/api/issues", (req, res) => {
+  const issues = loadSharedIssues();
+  if (issues === null) {
+    // No server-side issues yet — tell client to use its seed data
+    return res.json({ seeded: true, issues: [] });
+  }
+  return res.json({ seeded: false, issues });
+});
+
+// POST /api/issues — save all issues (called after any mutation)
+app.post("/api/issues", (req, res) => {
+  const { issues } = req.body;
+  if (!Array.isArray(issues)) {
+    return res.status(400).json({ error: "issues must be an array" });
+  }
+  saveSharedIssues(issues);
+  return res.json({ ok: true, count: issues.length });
+});
+
 // Configure Vite or Static Assets serving
 async function initializeServer() {
   if (process.env.NODE_ENV !== "production") {
