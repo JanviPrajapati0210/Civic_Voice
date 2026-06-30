@@ -1,6 +1,6 @@
 # 🏙️ Civic Voice — Hyperlocal Community Problem Solver
 
-> A solo hackathon project built for the **Community Hero** problem statement.
+> A hackathon project built for the **Community Hero** problem statement.
 
 Civic Voice is an AI-powered civic issue reporting platform that enables citizens to identify, report, verify, track, and resolve hyperlocal community problems — from potholes to broken streetlights — through collaboration, intelligent automation, and gamification.
 
@@ -8,7 +8,7 @@ Civic Voice is an AI-powered civic issue reporting platform that enables citizen
 
 ## 🚀 Live Demo
 
-- **Deployed Application:** `https://civic-voice-30697673088.asia-southeast1.run.app `
+- **Deployed Application:** `https://civic-voice-30697673088.asia-southeast1.run.app`  
 - **GitHub Repository:** `https://github.com/JanviPrajapati0210/Civic_Voice`
 
 ---
@@ -30,6 +30,7 @@ Civic Voice bridges the gap between citizens and local authorities by providing 
 - VMC/CMC Officials get a dedicated **admin portal** to moderate, verify, and resolve issues
 - **Predictive AI insights** highlight at-risk categories before they escalate
 - An **autonomous AI agent** runs silently on every submission — detecting duplicates, scoring priority, and posting a dispatch note without any human trigger
+- All reported issues are **stored server-side and shared in real time** across every user, so the entire community sees the same live data
 
 ---
 
@@ -48,6 +49,7 @@ Civic Voice bridges the gap between citizens and local authorities by providing 
 | 📈 Impact Dashboard | Recharts-powered analytics: category breakdown, status distribution, resolution stats |
 | 🔮 Predictive Insights | Gemini-powered analysis identifies at-risk categories and suggests preventive actions |
 | 🤖 Autonomous AI Agent | On every issue submission, a background agent autonomously runs duplicate detection, computes a priority score (0–100), and posts a professional dispatch note — no user action needed |
+| 🌐 Real-Time Shared Data | Issues are stored server-side and synced across all users — anyone reporting an issue is instantly visible to every other user on any device or browser, with automatic polling every 30 seconds |
 | 🏅 Gamification | XP points on every action, 6 unlockable badges, and a community leaderboard |
 | 🏛️ VMC/CMC Official Portal | Admin dashboard for authorities to verify issues, post dispatch updates, flag spam, and manage resolution |
 | 🚫 Spam Detection | Officials can flag fraudulent reports; spam issues are hidden from public map views |
@@ -79,7 +81,8 @@ Civic Voice bridges the gap between citizens and local authorities by providing 
 - **Google Cloud Run** — Hosting and deployment
 
 ### Storage & Auth
-- **localStorage** — Client-side persistence with compressed image thumbnails (120×120, ~3KB per issue)
+- **Server-side shared JSON store** — issues are persisted on the server (`server.ts`) and synced in real time across all users via `/api/issues`, with 30-second polling so every user sees community-wide reports instantly
+- **localStorage** — Personal data (auth, badges, XP, theme preference) stored per browser, plus compressed image thumbnails (120×120, ~3KB per issue)
 - **Client-side image compression** — Canvas API compresses uploads before storage to prevent quota crashes
 - **SHA-256 hashing** (custom pure-JS implementation) — Secure password storage; auto-upgrades legacy plain-text passwords
 
@@ -120,7 +123,7 @@ civic-voice/
 
 ```bash
 # 1. Clone the repository
-git clone [your-github-url]
+git clone https://github.com/JanviPrajapati0210/Civic_Voice
 cd civic-voice
 
 # 2. Install dependencies
@@ -150,4 +153,4 @@ Deployed via **Google AI Studio** to **Google Cloud Run**.
 
 ## 👤 Author
 
-**Janvi Prajapati**   
+**Janvi Prajapati**
